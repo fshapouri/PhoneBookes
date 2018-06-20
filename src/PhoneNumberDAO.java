@@ -3,7 +3,7 @@ import java.util.Vector;
 
 public class PhoneNumberDAO {
 
-    private static String dbURL = "jdbc:derby://localhost:1527/myDB;create=true";
+    private static String dbURL = "jdbc:derby://localhost:1527/c:/myDB;create=true";
     private static Connection cn=null;
     private static Statement st=null;
 
@@ -13,11 +13,27 @@ public class PhoneNumberDAO {
         st=cn.createStatement();
     }
 
-    public static void insertPhoneNumber(PhoneNumber phoneNumber) throws Exception{
-        open();
-        st.executeUpdate("INSERT INTO phoneNumber VALUES ("+phoneNumber.getPhoneNumberId()+
-                ",'"+phoneNumber.getNumber()+"','"+phoneNumber.getNumberType()+"')");
-        close();
+    public static void insertPhoneNumber(PhoneNumber phoneNumber){
+        try {
+            open();
+            st.executeUpdate("INSERT INTO phoneNumber VALUES ("+phoneNumber.getPhoneNumberId()+
+                    ",'"+phoneNumber.getNumber()+"','"+phoneNumber.getNumberType()+"')");
+            close();
+        }catch (Exception sqlExcept) {
+
+            if (sqlExcept.getMessage().equals("Table/View 'phoneNumber' does not exist")) {
+                try {
+                    st.executeUpdate("CREATE TABLE phoneNumber(phoneNumberId int , number int, type VARCHAR (255))");
+                    insertPhoneNumber(phoneNumber);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+            }else {
+                sqlExcept.printStackTrace();
+            }
+        }
+
     }
 
     public static void removePhoneNumber(PhoneNumber phoneNumber)throws Exception{
